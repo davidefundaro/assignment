@@ -8,35 +8,39 @@ systime.0 <- Sys.time()
 
 list.files(here(.profile$path.data))
 
-read_ <- function(x, y) feather::read_feather(here(.profile$path.data, paste("Test", x, y, sep = "_") %>% paste0(".feather")))
+read_ <- function(x, y) feather::read_feather(here(.profile$path.data, paste("Assignment", x, y, sep = "_") %>% paste0(".feather")))
 
 df <- list()
 
 df0 = list(
-  main = read_("Report", "Borrowers"),
+  #main = read_("Report", "Borrowers"),
   loan = read_("Report", "Loans"),
   
   counterparty = read_("Report", "Counterparties"),
   entity = read_("Report", "Entities"),
   
-  procedure = read_("Report", "Procedures"),
+  #procedure = read_("Report", "Procedures"),
   
   collection = read_("Report", "Collections"),
   
-  guarantee = read_("Report", "Guarantees")
+  guarantee = read_("Report", "Guarantees"),
+  
+  agreement = read_("Report", "Agreement.summary"),
+  
+  ppt = read_("Report", "PPT.summary")
 )
 
 
 link0 <- list(
-  counterparty.entity = read_("Link", "Counterparty_Entity"),
+  guarantee.entity = read_("Link", "Counterparties"),
 
-  proc.loan = read_("Link", "Procedure_Loan"),
-  proc.collateral = read_("Link", "Procedure_Collateral"),
-  proc.entity = read_("Link", "Procedure_Entity"),
+  counterparty.entity = read_("Link", "Loans")
+  #proc.collateral = read_("Link", "Procedure_Collateral"),
+  #proc.entity = read_("Link", "Procedure_Entity"),
   
-  guarantee.cadastral = read_("Link", "Guarantee_Cadastral"),
-  guarantee.loan = read_("Link", "Guarantee_Loan"),
-  guarantee.entity = read_("Link", "Guarantee_Entity")
+  #guarantee.cadastral = read_("Link", "Guarantee_Cadastral"),
+  #guarantee.loan = read_("Link", "Guarantee_Loan"),
+  #guarantee.entity = read_("Link", "Guarantee_Entity")
 )
 
 
@@ -75,6 +79,15 @@ temp$highest <- df0$loan %>%
   select(id.bor, originator:status, date.status)
 
 
+
+#### create the link between loan and counterparty ####
+
+link0$counterparty.loan <- df0$loan %>% left_join(distinct(df0$counterparty), by="id.bor") %>%
+  select(id.loan, id.counterparty, id.bor) %>% distinct()
+
+
+
+
 #. Check
 # temp$highest %>% View
 # df0$loan %>%
@@ -85,6 +98,8 @@ temp$highest <- df0$loan %>%
 
 
 #########......... 0) aggregate ind/corp (only for role = "borrower")
+
+#### this serves to determine the principal type for each orrower ####
 temp$type.bor <- df0$entity %>% 
   
   left_join(link0$counterparty.entity, by = "id.entity", multiple = "all") %>% 
@@ -302,3 +317,8 @@ df0$loan %>%
 ###-----------------------------------------------------------------------###
 #-----          - Intro                                           -----         
 ###-----------------------------------------------------------------------###
+
+
+
+#vedi le freq ecc delle tabelle
+#fai tabelle

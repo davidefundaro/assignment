@@ -27,7 +27,6 @@ library(sp)
 library(lubridate)
 library(scales)
 library(feather)
-library(xlsx)
 library(here)
 
 # library(arrow)
